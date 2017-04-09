@@ -1,0 +1,153 @@
+﻿<!DOCTYPE html>
+<html onscroll="alert('asd')">
+<head lang="en">
+
+
+    <script src="../../../scripts/buildfire.js"></script>
+    <script src="../../../scripts/jquery/jquery-1.11.2.min.js"></script>
+
+    <style>
+
+        body {
+            font-family: sans-serif;
+            padding: 15px;
+        }
+
+        .sl {
+            display: block;
+            position: absolute;
+            top: 15px;
+            color: #dddedf;
+        }
+
+        span {
+            margin: 10px;
+            opacity: 0;
+            filter: blur(20px);
+            text-transform: uppercase;
+            font-weight: 900;
+        }
+
+        .sl.active span {
+            opacity: 1;
+            filter: blur(0px);
+            transition: 1s;
+        }
+
+        .active {
+            z-index: 10;
+        }
+
+
+
+    </style>
+    <style>
+        .items{
+            margin-top:150px;
+            height:75%;
+            overflow: auto;
+        }
+
+        .items > div{
+            opacity: 1;
+            height:200px;
+            margin-bottom: 8px;
+        }
+
+
+        .large{
+            top:0px !important;
+            left:0px !important;
+            position: absolute;
+            height: 100% !important;
+            width: 100%;
+            z-index: 999;
+            -webkit-animation:zoom .5s ease-out;
+        }
+
+        @keyframes zoom {
+            0%   { height: 200px; top:50%}
+            100% { height: 100%;  top:0px;}
+        }
+
+    </style>
+</head>
+<body >
+
+<div id="box"></div>
+<div class="items">
+    <div class="item" onclick="enlarge(this);" style=" background-color: darkgrey;"></div>
+    <div class="item" onclick="enlarge(this);" style=" background-color: lightgoldenrodyellow;"></div>
+    <div class="item" onclick="enlarge(this);" style=" background-color: darkgrey;"></div>
+    <div class="item" onclick="enlarge(this);" style=" background-color: lightgoldenrodyellow;"></div>
+    <div class="item" onclick="enlarge(this);" style=" background-color: darkgrey;"></div>
+    <div class="item" onclick="enlarge(this);" style=" background-color: lightgoldenrodyellow;"></div>
+
+</div>
+<script>
+
+        var sentences = new Array ('Welcome  Mr. Blair','Hand Picked Luxury Properties','THE NEXT BLIAR MANNER AWAITS'
+            , 'The Ultimate in luxury', 'Perfection Manifest', 'Heaven on earth');
+
+        var timer = 6000;
+
+        $(document).ready(function(){
+
+            var total = sentences.length - 1;
+
+            for (var i = 0; i <= total; i++) {
+
+                $('#box').append('<p class="sl" id="textBox'+i+'"></p>');
+
+                var max = sentences[i].length - 1;
+
+                for (var j = 0; j <= max; j++) {
+                    $('#textBox'+i).append('<span style="transition: ' + Math.random()*3 + 's; transition-delay: ' + Math.random() + 's;">' + sentences[i].charAt(j) + '</span>');
+                };
+
+            };
+
+            var maxBox = $('#box > p').length;
+            var r = 0;
+
+            $('#textBox' + r).addClass('active');
+
+            var tmrInterval;
+
+
+            window.pause = function(){
+                clearInterval(tmrInterval);
+            };
+            window.play = function(){
+                tmrInterval= setInterval(function(){
+
+                    $('#textBox' + r).removeClass('active');
+
+                    r++;
+
+                    if (r == maxBox) {
+                        r = 0;
+                    }
+
+                    setTimeout(function(){
+                        $('#textBox' + r).addClass('active');
+                    }, 2000);
+
+                }, timer);
+            };
+            window.play();
+
+        });
+
+</script>
+<script>
+    function enlarge(e){
+        debugger;
+        e.classList.add('large');
+    }
+</script>
+
+
+
+</body>
+</html>
