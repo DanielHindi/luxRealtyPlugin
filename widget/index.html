@@ -49,39 +49,64 @@
         }
 
         .items > div{
-            opacity: 1;
-            height:200px;
             margin-bottom: 8px;
+
         }
 
+        .items > div > div > p{
+            display:none;
+        }
 
         .large{
             top:0px !important;
             left:0px !important;
             position: absolute;
-            height: 100% !important;
-            width: 100%;
             z-index: 999;
-            -webkit-animation:zoom .5s ease-out;
+            -webkit-animation:zoom .3s ease-out;
+            width:100vw;
+            height: 100vh;
+            background: -webkit-linear-gradient(top, rgba(255,255,255,1) 75%,rgba(200,200,200,1) 100% );
         }
 
+
         @keyframes zoom {
-            0%   { height: 200px; top:50%}
-            100% { height: 100%;  top:0px;}
+            0%   { height: 160px; top:50%;}
+            100% { height: 100vh; top:0px; }
+
         }
+
+
+        .shrink{
+            height:auto;
+            width:100%;
+            -webkit-animation: zoomOut .3s ease-out;
+
+        }
+        @keyframes zoomOut {
+            0%  {left:0px; height: 100vh; top:0%;position: absolute; opacity: 1;}
+            99% {left:0px; height: 0vh; top:33%; position: absolute;opacity: 0;}
+            100% {left:auto;position: relative;}
+        }
+
+
+        .items > div > div.large > p{
+            -webkit-animation:lastMinuteFadeIn .5s ease-in;
+            display:block;
+        }
+
+        @keyframes lastMinuteFadeIn {
+            0%   { opacity:0;}
+            50%   { opacity:0;}
+            100%  { opacity:1;}
+        }
+
 
     </style>
 </head>
 <body >
 
 <div id="box"></div>
-<div class="items">
-    <div class="item" onclick="enlarge(this);" style=" background-color: darkgrey;"></div>
-    <div class="item" onclick="enlarge(this);" style=" background-color: lightgoldenrodyellow;"></div>
-    <div class="item" onclick="enlarge(this);" style=" background-color: darkgrey;"></div>
-    <div class="item" onclick="enlarge(this);" style=" background-color: lightgoldenrodyellow;"></div>
-    <div class="item" onclick="enlarge(this);" style=" background-color: darkgrey;"></div>
-    <div class="item" onclick="enlarge(this);" style=" background-color: lightgoldenrodyellow;"></div>
+<div id="items" class="items">
 
 </div>
 <script>
@@ -139,12 +164,94 @@
 
         });
 
+        function enlarge(e){
+            var ele = e.srcElement.parentElement;
+            if(ele.className.indexOf('large') >= 0 ){
+                ele.classList.remove('large');
+                ele.classList.add('shrink');
+            }
+            else {
+                ele.classList.add('large');
+                ele.classList.remove('shrink');
+            }
+        }
+
 </script>
 <script>
-    function enlarge(e){
-        debugger;
-        e.classList.add('large');
+    var plugins=[];
+
+    function loadData(err,obj){
+        if(err)return;
+        if(!obj.data._buildfire)return;
+
+        plugins = prepPlugins(obj.data._buildfire.plugins);
+        var pluginsContainer= document.getElementById("items");
+        //pluginsContainer.innerHTML='';
+
+        var h =Math.round(window.innerWidth * (9/16));
+        for(var i=0; i < plugins.length ; i++){
+            var p=plugins[i].data || plugins[i];
+
+            var container = document.createElement('div'); //reserves the space while the inner div moves
+            //container.classList.add("divContainer");
+            container.style.height=h +'px';
+
+
+            var div = document.createElement('div');
+            //divTitle.innerHTML = p.title;
+            div.classList.add("item");
+            //div.style.height=h +'px';
+            div.setAttribute('index',i);
+            container.appendChild (div);
+
+            var img = document.createElement("img");
+            img.src = buildfire.imageLib.cropImage(p.iconUrl,{width:innerHeight, height:innerWidth });
+            img.setAttribute('orgUrl',p.iconUrl);
+            img.onclick=enlarge;
+            div.appendChild(img);
+
+
+            var p = document.createElement('p');
+            p.innerHTML='This is a big chunk of text. This is a big chunk of text. This is a big chunk of text. This is a big chunk of text. This is a big chunk of text. ';
+            div.appendChild(p);
+
+            pluginsContainer.appendChild(container);
+        }
     }
+
+    function prepPlugins(plugins){
+        if(!plugins || !plugins.result || !plugins.result.length) return [];
+        if(!plugins.result[0].data) return plugins.result;
+
+        var temp=[];
+        plugins.result.forEach(function(p){
+            var i = plugins.data.indexOf(p.data.instanceId);
+            if(i>=0) temp[i] = p.data;
+        });
+
+        return temp;
+    }
+
+    buildfire.datastore.getWithDynamicData(loadData);
+    buildfire.datastore.onUpdate(function(obj){loadData(null,obj)});
+
+
+    function onClick(e){
+
+        var i = parseInt(this.getAttribute('index') );
+        var p = plugins[i];
+
+        buildfire.navigation.navigateTo({
+            pluginId: p.pluginTypeId
+            ,folderName : p.folderName || p.pluginType.folderName
+            ,instanceId : p.instanceId
+            ,title:p.title
+        });
+    }
+
+
+
+
 </script>
 
 
